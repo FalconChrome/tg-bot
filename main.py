@@ -38,7 +38,7 @@ class Bot:
   
     def start(self, update, context):
         update.message.reply_text(
-            "Привет! Я эхо-бот. Напишите мне что-нибудь, и я пришлю это назад!")
+            "Привет! Напишите мне что-нибудь, и я пришлю ответ!")
 
     def help(self, update, context):
         update.message.reply_text(
