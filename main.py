@@ -43,7 +43,9 @@ class Bot:
     def help(self, update, context):
         update.message.reply_text(
             """/start - запуск бота
-/help - помощь""")
+/help - помощь
+
+deployed by heroku v.0.9.205""")
 
 
 if __name__ == '__main__':
