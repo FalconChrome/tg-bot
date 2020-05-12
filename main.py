@@ -4,11 +4,16 @@ from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Updater, Filters
 from telegram.ext import MessageHandler, CommandHandler, ConversationHandler
 from random import randrange, shuffle
+import logging
 
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 class Bot:
     DATA = 'data'
-    IMAGES = path.join('data', 'images')
+    IMAGES = path.join(DATA, 'images')
     TOKEN = open(path.join(DATA, 'QB token')).read().strip()
     QUESTIONS = json.load(open(path.join(DATA,
                                          ('questions.json'))))['questions']
@@ -37,11 +42,18 @@ class Bot:
         )
         dp.add_handler(conv_handler)
 
+        # log all errors
+        dp.add_error_handler(error)
+
         # Запускаем цикл приема и обработки сообщений.
         updater.start_polling()
 
         # Ждём завершения приложения.
         updater.idle()
+
+    def error(update, context):
+        """Log Errors caused by Updates."""
+        logger.warning('Update "%s" caused error "%s"', update, context.error)
 
     def ask(self, update, context):
         n_left = len(context.user_data['not asked'])
@@ -82,7 +94,7 @@ class Bot:
 /help - помощь
 /stop - завершить викторину
 
-deployed by heroku v1.3""")
+deployed by heroku v1.3.1""")
 
     def stop(self, update, context):
         context.user_data['not asked'].append(context.user_data['current'])
@@ -94,28 +106,25 @@ deployed by heroku v1.3""")
                                   reply_markup=ReplyKeyboardRemove())
         n_asked = len(self.QUESTIONS) - len(context.user_data['not asked'])
         res = context.user_data['right n']
+        user = update.message.from_user
+        logger.info("Result of %s: %s out of %s", user.first_name, res, n_asked)
         update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
         if n_asked == 0:
             return None
         rate = res / n_asked
         if rate < 0.5:
-            context.bot.send_photo(
-                update.message.chat_id,  # Идентификатор чата.
-                open(path.join(self.IMAGES, 'low.jpg'), 'rb'),
-                caption="Не расстраивайтесь!"
-            )
+            self.send_photo(update, context, 'low.jpg', "Не расстраивайтесь!")
         elif rate <= 0.9:
-            context.bot.send_photo(
-                update.message.chat_id,
-                open(path.join(self.IMAGES, 'high.jpg'), 'rb'),
-                caption="Вы хорошо эрудированы!"
-            )
+            self.send_photo(update, context, 'high.jpg', "Вы хорошо эрудированы!")
         else:
-            context.bot.send_photo(
-                update.message.chat_id,
-                open(path.join(self.IMAGES, 'best.jpg'), 'rb'),
-                caption="Вы гений!"
-            )
+            self.send_photo(update, context, 'best.jpg', "Вы гений!")
+
+    def send_photo(self, update, context, name, caption=None):
+       context.bot.send_photo(
+            update.message.chat_id,  # Идентификатор чата.
+            open(path.join(self.IMAGES, name), 'rb'),
+            caption=caption
+       )
 
 
 if __name__ == '__main__':
