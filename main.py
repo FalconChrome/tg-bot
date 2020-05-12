@@ -9,7 +9,7 @@ from random import randrange, shuffle
 class Bot:
     DATA = 'data'
     IMAGES = path.join('data', 'images')
-    TOKEN = open(path.join(DATA, 'QB token')).read().strip()
+    TOKEN = open(path.join(DATA, 'YB token')).read().strip()
     QUESTIONS = json.load(open(path.join(DATA,
                                          ('questions.json'))))['questions']
     # Структура файла вопросов:
@@ -81,7 +81,7 @@ class Bot:
 /help - помощь
 /stop - завершить викторину
 
-deployed by heroku v1.0""")
+deployed by heroku v1.2""")
 
     def stop(self, update, context):
         context.user_data['not asked'].append(context.user_data['current'])
@@ -96,7 +96,7 @@ deployed by heroku v1.0""")
         update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
         if n_asked == 0:
             return None
-        if res / n_asked < 0.5:
+        if res / n_asked < 0.9:
             context.bot.send_photo(
                 update.message.chat_id,  # Идентификатор чата.
                 open(path.join(self.IMAGES, 'low.jpg'), 'rb'),
