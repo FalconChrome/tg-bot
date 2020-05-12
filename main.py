@@ -9,7 +9,7 @@ from random import randrange, shuffle
 class Bot:
     DATA = 'data'
     IMAGES = path.join('data', 'images')
-    TOKEN = open(path.join(DATA, 'YB token')).read().strip()
+    TOKEN = open(path.join(DATA, 'QB token')).read().strip()
     QUESTIONS = json.load(open(path.join(DATA,
                                          ('questions.json'))))['questions']
     # Структура файла вопросов:
