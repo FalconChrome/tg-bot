@@ -8,6 +8,7 @@ from random import randrange, shuffle
 
 class Bot:
     DATA = 'data'
+    IMAGES = path.join('data', 'images')
     TOKEN = open(path.join(DATA, 'QB token')).read().strip()
     QUESTIONS = json.load(open(path.join(DATA,
                                          ('questions.json'))))['questions']
@@ -93,6 +94,8 @@ deployed by heroku v1.0""")
         n_asked = len(self.QUESTIONS) - len(context.user_data['not asked'])
         res = context.user_data['right n']
         update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
+        if n_asked == 0:
+            return None
         if res / n_asked < 0.5:
             update.message.reply_text("Не расстраивайтесь!")
         else:
