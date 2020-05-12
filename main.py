@@ -93,6 +93,10 @@ deployed by heroku v1.0""")
         n_asked = len(self.QUESTIONS) - len(context.user_data['not asked'])
         res = context.user_data['right n']
         update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
+        if res / n_asked < 0.5:
+            update.message.reply_text("Не расстраивайтесь!")
+        else:
+            update.message.reply_text("Вы хорошо эрудированы!")
 
 
 if __name__ == '__main__':
