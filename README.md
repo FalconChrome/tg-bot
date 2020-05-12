@@ -1,2 +1,4 @@
 # tg-bot
-telegram bot
+quiz telegram bot
+you can find it @YaLycTestBot
+deployed by Heroku
