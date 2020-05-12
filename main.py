@@ -77,11 +77,12 @@ class Bot:
 
     def help(self, update, context):
         update.message.reply_text(
-            """/start - запуск викторины
+            """Познавательная викторина с вариантами ответов
+/start - запуск викторины
 /help - помощь
 /stop - завершить викторину
 
-deployed by heroku v1.2""")
+deployed by heroku v1.3""")
 
     def stop(self, update, context):
         context.user_data['not asked'].append(context.user_data['current'])
