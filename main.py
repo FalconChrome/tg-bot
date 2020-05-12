@@ -94,7 +94,7 @@ class Bot:
 /help - помощь
 /stop - завершить викторину
 
-deployed by heroku v1.3.1""")
+deployed by heroku v1.4.0""")
 
     def stop(self, update, context):
         context.user_data['not asked'].append(context.user_data['current'])
