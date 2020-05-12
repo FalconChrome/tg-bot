@@ -1,46 +1,41 @@
 import json
 from os import path
-from telegram.ext import Updater, MessageHandler, Filters
-from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
-from random import randrange
-
-
-DATA = 'data'
-
-def load_json(file):
-        file = path.join(DATA, file)
-        return json.load(open(file))
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram.ext import Updater, Filters
+from telegram.ext import MessageHandler, CommandHandler, ConversationHandler
+from random import randrange, shuffle
 
 
 class Bot:
-    TOKEN = open(path.join(DATA, 'YLTB token')).read().strip()
-    REQUEST_KWARGS = load_json('proxy socks5.json')
-    QUESTIONS = load_json('questions.json')['questions']
+    DATA = 'data'
+    TOKEN = open(path.join(DATA, 'bot token')).read().strip()
+    QUESTIONS = json.load(open(path.join(DATA,
+                                         ('questions.json'))))['questions']
     # Структура файла вопросов:
-    # {'questions': [[вопрос1, правильный ответ, неправильный ответ], ...]}
+    # {'questions': [[вопрос, правильный_ответ, *неправильные_ответы], ...]}
 
     def __init__(self):
-        updater = Updater(self.TOKEN, use_context=True, 
-                          request_kwargs=self.REQUEST_KWARGS)
+        updater = Updater(self.TOKEN, use_context=True)
 
         # Получаем из него диспетчер сообщений.
         dp = updater.dispatcher
 
-        dp.add_handler(CommandHandler("help", self.help))
+        dp.add_handler(CommandHandler('help', self.help))
         conv_handler = ConversationHandler(
             # Точка входа в диалог.
             # В данном случае — команда /start. Она задаёт первый вопрос.
-            entry_points=[CommandHandler('start', self.start)],
+            entry_points=[CommandHandler('start', self.start, pass_user_data=True)],
 
             states={
-                1: [MessageHandler(Filters.text, self.answer, pass_user_data=True)]
+                1: [MessageHandler(~Filters.command & Filters.text, self.answer,
+                                   pass_user_data=True)]
             },
 
             # Точка прерывания диалога. В данном случае — команда /stop.
-            fallbacks=[CommandHandler('stop', self.stop)]
+            fallbacks=[CommandHandler('stop', self.stop, pass_user_data=True)]
         )
         dp.add_handler(conv_handler)
-        
+
         # Запускаем цикл приема и обработки сообщений.
         updater.start_polling()
 
@@ -50,29 +45,32 @@ class Bot:
     def ask(self, update, context):
         n_left = len(context.user_data['not asked'])
         if n_left <= 0:
-            self.finish(update, context, n_left)
             return True
         q = context.user_data['not asked'].pop(randrange(n_left))
-        context.user_data['q'] = q
-        update.message.reply_text(self.QUESTIONS[q][0])
-##                                  reply_markup=self.markup(q))
-##
-##    def markup(self, q):
-##        return ReplyKeyboardMarkup(
+        context.user_data['current'] = q
+        markup = self.markup(q)
+        update.message.reply_text(self.QUESTIONS[q][0], reply_markup=self.markup(q))
+
+    def markup(self, q):
+        items = self.QUESTIONS[q][1:]
+        shuffle(items)
+        items = [items[:2], items[2:]]
+        return ReplyKeyboardMarkup(items, one_time_keyboard=True)
 
     def answer(self, update, context):
-        update.message.reply_text("Ответ пришёл!")
         ans = update.message.text
-        if ans == self.QUESTIONS[context.user_data['q']][1]:
-            context.user_data['right'] += 1
+        if ans == self.QUESTIONS[context.user_data['current']][1]:
+            context.user_data['right n'] += 1
         if self.ask(update, context):
+            self.show_res(update, context)
             return ConversationHandler.END
         return 1
 
     def start(self, update, context):
         context.user_data['not asked'] = list(range(len(self.QUESTIONS)))
-        context.user_data['right'] = 0
-        update.message.reply_text("Дороу! Щя буит мяса!")
+        context.user_data['current'] = 0
+        context.user_data['right n'] = 0
+        update.message.reply_text("Здравствуйте! Сейчас мы проведём викторину!")
         self.ask(update, context)
         return 1
 
@@ -82,17 +80,19 @@ class Bot:
 /help - помощь
 /stop - завершить викторину
 
-deployed by heroku v.0.9.21
-""")
+deployed by heroku v1.0""")
 
     def stop(self, update, context):
-        update.message.reply_text("Хотите завершить игру?")
+        context.user_data['not asked'].append(context.user_data['current'])
+        self.show_res(update, context)
+        return ConversationHandler.END
 
-    def finish(self, update, context, n_left):
-        print(context.user_data['right'])
-        res = context.user_data['right']
-        update.message.reply_text(f"Ваш результат: {context.user_data['right']}"
-                                  f" из {len(self.QUESTIONS) - n_left}.")
+    def show_res(self, update, context):
+        update.message.reply_text('Завершение викторины',
+                                  reply_markup=ReplyKeyboardRemove())
+        n_asked = len(self.QUESTIONS) - len(context.user_data['not asked'])
+        res = context.user_data['right n']
+        update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
 
 
 if __name__ == '__main__':
