@@ -11,6 +11,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
+
 class Bot:
     DATA = 'data'
     IMAGES = path.join(DATA, 'images')
@@ -43,7 +44,7 @@ class Bot:
         dp.add_handler(conv_handler)
 
         # log all errors
-        dp.add_error_handler(error)
+        dp.add_error_handler(self.error)
 
         # Запускаем цикл приема и обработки сообщений.
         updater.start_polling()
@@ -51,7 +52,7 @@ class Bot:
         # Ждём завершения приложения.
         updater.idle()
 
-    def error(update, context):
+    def error(self, update, context):
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', update, context.error)
 
@@ -94,7 +95,7 @@ class Bot:
 /help - помощь
 /stop - завершить викторину
 
-deployed by heroku v1.4.0""")
+deployed by heroku v1.4.1""")
 
     def stop(self, update, context):
         context.user_data['not asked'].append(context.user_data['current'])
@@ -106,18 +107,21 @@ deployed by heroku v1.4.0""")
                                   reply_markup=ReplyKeyboardRemove())
         n_asked = len(self.QUESTIONS) - len(context.user_data['not asked'])
         res = context.user_data['right n']
+
         user = update.message.from_user
         logger.info("Result of %s: %s out of %s", user.first_name, res, n_asked)
+
         update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
         if n_asked == 0:
             return None
         rate = res / n_asked
         if rate < 0.5:
-            self.send_photo(update, context, 'low.jpg', "Не расстраивайтесь!")
+            photo = ('low.jpg', "Не расстраивайтесь!")
         elif rate <= 0.9:
-            self.send_photo(update, context, 'high.jpg', "Вы хорошо эрудированы!")
+            photo = ('high.jpg', "Вы хорошо эрудированы!")
         else:
-            self.send_photo(update, context, 'best.jpg', "Вы гений!")
+            photo = ('best.jpg', "Вы гений!")
+        self.send_photo(update, context, *photo)
 
     def send_photo(self, update, context, name, caption=None):
        context.bot.send_photo(
