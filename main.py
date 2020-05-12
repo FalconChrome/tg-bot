@@ -96,7 +96,7 @@ deployed by heroku v1.2""")
         update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
         if n_asked == 0:
             return None
-        if res / n_asked < 0.9:
+        if res / n_asked < 0.5:
             context.bot.send_photo(
                 update.message.chat_id,  # Идентификатор чата.
                 open(path.join(self.IMAGES, 'low.jpg'), 'rb'),
