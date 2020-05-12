@@ -60,6 +60,7 @@ class Bot:
         n_left = len(context.user_data['not asked'])
         if n_left <= 0:
             return True
+
         q = context.user_data['not asked'].pop(randrange(n_left))
         context.user_data['current'] = q
         markup = self.markup(q)
@@ -75,6 +76,7 @@ class Bot:
         ans = update.message.text
         if ans == self.QUESTIONS[context.user_data['current']][1]:
             context.user_data['right n'] += 1
+
         if self.ask(update, context):
             self.show_res(update, context)
             return ConversationHandler.END
@@ -107,11 +109,11 @@ deployed by heroku v1.4.1""")
                                   reply_markup=ReplyKeyboardRemove())
         n_asked = len(self.QUESTIONS) - len(context.user_data['not asked'])
         res = context.user_data['right n']
+        update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
 
         user = update.message.from_user
         logger.info("Result of %s: %s out of %s", user.first_name, res, n_asked)
 
-        update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
         if n_asked == 0:
             return None
         rate = res / n_asked
