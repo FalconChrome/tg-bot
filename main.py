@@ -96,17 +96,24 @@ deployed by heroku v1.2""")
         update.message.reply_text(f"Ваш результат: {res} из {n_asked}.")
         if n_asked == 0:
             return None
-        if res / n_asked < 0.5:
+        rate = res / n_asked
+        if rate < 0.5:
             context.bot.send_photo(
                 update.message.chat_id,  # Идентификатор чата.
                 open(path.join(self.IMAGES, 'low.jpg'), 'rb'),
                 caption="Не расстраивайтесь!"
             )
-        else:
+        elif rate <= 0.9:
             context.bot.send_photo(
                 update.message.chat_id,
                 open(path.join(self.IMAGES, 'high.jpg'), 'rb'),
                 caption="Вы хорошо эрудированы!"
+            )
+        else:
+            context.bot.send_photo(
+                update.message.chat_id,
+                open(path.join(self.IMAGES, 'best.jpg'), 'rb'),
+                caption="Вы гений!"
             )
 
 
