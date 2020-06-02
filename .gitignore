@@ -128,4 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-./data/QB token
+# API key
+/data/QB token
