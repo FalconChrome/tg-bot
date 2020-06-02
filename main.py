@@ -1,5 +1,5 @@
 import json
-from os import path
+import os
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Updater, Filters
 from telegram.ext import MessageHandler, CommandHandler, ConversationHandler
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Bot:
     DATA = 'data'
     IMAGES = path.join(DATA, 'images')
-    TOKEN = open(path.join(DATA, 'QB token')).read().strip()
+    TOKEN = os.environ['QB_TOKEN']
     QUESTIONS = json.load(open(path.join(DATA,
                                          ('questions.json'))))['questions']
     # Структура файла вопросов:
