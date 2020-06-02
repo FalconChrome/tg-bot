@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 
 class Bot:
     DATA = 'data'
-    IMAGES = path.join(DATA, 'images')
+    IMAGES = os.path.join(DATA, 'images')
     TOKEN = os.environ['QB_TOKEN']
-    QUESTIONS = json.load(open(path.join(DATA,
-                                         ('questions.json'))))['questions']
+    QUESTIONS = json.load(open(os.path.join(DATA,
+                                            ('questions.json'))))['questions']
     # Структура файла вопросов:
     # {'questions': [[вопрос, правильный_ответ, *неправильные_ответы], ...]}
 
@@ -128,7 +128,7 @@ deployed by heroku v1.4.2""")
     def send_photo(self, update, context, name, caption=None):
        context.bot.send_photo(
             update.message.chat_id,  # Идентификатор чата.
-            open(path.join(self.IMAGES, name), 'rb'),
+            open(os.path.join(self.IMAGES, name), 'rb'),
             caption=caption
        )
 
